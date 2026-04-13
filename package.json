@@ -1,0 +1,11 @@
+{
+  "name": "portfolio-cv-hk4",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
