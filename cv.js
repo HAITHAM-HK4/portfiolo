@@ -369,6 +369,7 @@ var observer = new IntersectionObserver(function(entries) {
 })();
 
 // 9. INIT — جلب البيانات من API ثم رسم الصفحة
+var _loadStart = Date.now();
 document.addEventListener('DOMContentLoaded', function() {
 
     document.querySelectorAll('.reveal, .slide-left, .slide-right').forEach(function(el) {
@@ -380,8 +381,37 @@ document.addEventListener('DOMContentLoaded', function() {
         if (h) h.classList.add('nav-visible');
     }, 400);
 
+    /* عداد النسبة المئوية للـ loader */
+    (function() {
+        var pctEl = document.getElementById('loader-pct');
+        if (!pctEl) return;
+        var start = Date.now(), duration = 3200, endVal = 100;
+        function tick() {
+            var elapsed = Date.now() - start;
+            var progress = Math.min(elapsed / duration, 1);
+            var eased = progress < .85 ? progress * (progress * .5 + .75) : progress;
+            var val = Math.min(Math.round(eased * endVal), 100);
+            pctEl.textContent = val + '%';
+            if (progress < 1) requestAnimationFrame(tick);
+        }
+        tick();
+    })();
+
+    /* fallback: أخفِ الـ loader بعد 3.5 ثوانٍ على أي حال */
+    setTimeout(function() {
+        var sk = document.getElementById('page-loader');
+        if (sk) sk.classList.add('hide');
+    }, 5500);
+
     /* جلب البيانات ورسمها */
     fetchPortfolioData().then(function(db) {
         renderDynamicContent(db);
+        /* إخفاء الـ loader بعد اكتمال البيانات — لا يقل عن 2.5 ثانية */
+        var elapsed = Date.now() - _loadStart;
+        var delay = Math.max(0, 5500 - elapsed);
+        setTimeout(function() {
+            var sk = document.getElementById('page-loader');
+            if (sk) sk.classList.add('hide');
+        }, delay);
     });
 });
