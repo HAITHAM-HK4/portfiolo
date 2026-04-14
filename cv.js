@@ -3,38 +3,42 @@
    يشمل: المؤشر، السكرول، الربط مع API، تبديل اللغة، الجسيمات
    ================================================================ */
 
-// 1. CUSTOM CURSOR
+// TOUCH DEVICE DETECTION
+var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+// 1. CUSTOM CURSOR — disabled on touch/mobile devices
 const dot  = document.getElementById('cursor-dot');
 const ring = document.getElementById('cursor-ring');
 let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
 
-document.addEventListener('mousemove', e => {
-    mouseX = e.clientX; mouseY = e.clientY;
-    dot.style.left = mouseX + 'px'; dot.style.top = mouseY + 'px';
-});
+if (!isTouchDevice) {
+    document.addEventListener('mousemove', e => {
+        mouseX = e.clientX; mouseY = e.clientY;
+        dot.style.left = mouseX + 'px'; dot.style.top = mouseY + 'px';
+    });
 
-function animateRing() {
-    ringX += (mouseX - ringX) * 0.15;
-    ringY += (mouseY - ringY) * 0.15;
-    ring.style.left = ringX + 'px'; ring.style.top = ringY + 'px';
-    requestAnimationFrame(animateRing);
+    (function animateRing() {
+        ringX += (mouseX - ringX) * 0.15;
+        ringY += (mouseY - ringY) * 0.15;
+        ring.style.left = ringX + 'px'; ring.style.top = ringY + 'px';
+        requestAnimationFrame(animateRing);
+    })();
+
+    document.addEventListener('mouseover', e => {
+        if (e.target.closest('a, button, input, textarea, .bento-card, .skill-card')) {
+            dot.style.transform  = 'translate(-50%,-50%) scale(1.5)';
+            ring.style.transform = 'translate(-50%,-50%) scale(1.5)';
+            ring.style.borderColor = '#b026ff';
+        }
+    });
+    document.addEventListener('mouseout', e => {
+        if (e.target.closest('a, button, input, textarea, .bento-card, .skill-card')) {
+            dot.style.transform  = 'translate(-50%,-50%) scale(1)';
+            ring.style.transform = 'translate(-50%,-50%) scale(1)';
+            ring.style.borderColor = 'rgba(168,85,247,0.6)';
+        }
+    });
 }
-animateRing();
-
-document.addEventListener('mouseover', e => {
-    if (e.target.closest('a, button, input, textarea, .bento-card, .skill-card')) {
-        dot.style.transform  = 'translate(-50%,-50%) scale(1.5)';
-        ring.style.transform = 'translate(-50%,-50%) scale(1.5)';
-        ring.style.borderColor = '#b026ff';
-    }
-});
-document.addEventListener('mouseout', e => {
-    if (e.target.closest('a, button, input, textarea, .bento-card, .skill-card')) {
-        dot.style.transform  = 'translate(-50%,-50%) scale(1)';
-        ring.style.transform = 'translate(-50%,-50%) scale(1)';
-        ring.style.borderColor = 'rgba(168,85,247,0.6)';
-    }
-});
 
 // 2. SCROLL & ACTIVE LINKS
 window.addEventListener('scroll', () => {
@@ -49,11 +53,15 @@ window.addEventListener('scroll', () => {
         let offset = sec.offsetTop - 150;
         let height = sec.offsetHeight;
         let id     = sec.getAttribute('id');
-        let navMap = { home:'nav-home', about:'nav-about', skills:'nav-skills', portfolio:'nav-projects', education:'nav-edu', contact:'nav-contact' };
+        let navMap       = { home:'nav-home',  about:'nav-about',  skills:'nav-skills',  portfolio:'nav-projects',  education:'nav-edu',  contact:'nav-contact'  };
+        let mobileNavMap = { home:'mnav-home', about:'mnav-about', skills:'mnav-skills', portfolio:'mnav-projects', education:'mnav-edu', contact:'mnav-contact' };
         if (top >= offset && top < offset + height && navMap[id]) {
             document.querySelectorAll('header nav a').forEach(a => a.classList.remove('active'));
+            document.querySelectorAll('.mobile-nav-links a').forEach(a => a.classList.remove('active'));
             let navEl = document.getElementById(navMap[id]);
             if (navEl) navEl.classList.add('active');
+            let mNavEl = document.getElementById(mobileNavMap[id]);
+            if (mNavEl) mNavEl.classList.add('active');
         }
     });
 });
@@ -211,7 +219,11 @@ function toggleLang() {
     var lang = isAr ? 'ar' : 'en';
     document.documentElement.setAttribute('dir',  isAr ? 'rtl' : 'ltr');
     document.documentElement.setAttribute('lang', isAr ? 'ar'  : 'en');
-    document.getElementById('lang-label-nav').textContent = isAr ? 'EN' : 'AR';
+    // Update both desktop and mobile language labels
+    var navLabel    = document.getElementById('lang-label-nav');
+    var mobileLabel = document.getElementById('lang-label-mobile');
+    if (navLabel)    navLabel.textContent    = isAr ? 'EN' : 'AR';
+    if (mobileLabel) mobileLabel.textContent = isAr ? 'EN' : 'AR';
 
     Object.keys(T).forEach(function(id) {
         var el = document.getElementById(id);
@@ -287,7 +299,7 @@ var observer = new IntersectionObserver(function(entries) {
         renderer.setSize(window.innerWidth, window.innerHeight);
 
         var geo   = new THREE.BufferGeometry();
-        var count = 3500;
+        var count = isTouchDevice ? 800 : 3500;
         var pos   = new Float32Array(count * 3);
         for (var i = 0; i < count * 3; i++) pos[i] = (Math.random() - 0.5) * 100;
         geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -318,6 +330,12 @@ var observer = new IntersectionObserver(function(entries) {
         resize();
         window.addEventListener('resize', function() { resize(); init(); });
         document.addEventListener('mousemove', function(e) { mouse.x = e.clientX; mouse.y = e.clientY; });
+        // Touch support for particle interaction
+        canvas.addEventListener('touchmove', function(e) {
+            var t = e.touches[0];
+            if (t) { mouse.x = t.clientX; mouse.y = t.clientY; }
+        }, { passive: true });
+        canvas.addEventListener('touchend', function() { mouse.x = -9999; mouse.y = -9999; }, { passive: true });
 
         function Particle() { this.reset(); }
         Particle.prototype.reset = function() {
@@ -338,7 +356,9 @@ var observer = new IntersectionObserver(function(entries) {
             ctx.shadowBlur = 8; ctx.shadowColor = 'rgba(' + this.color + ',0.6)';
             ctx.fill(); ctx.shadowBlur = 0;
         };
-        function init() { particles = []; for (var i = 0; i < Math.floor((W*H)/14000); i++) particles.push(new Particle()); }
+        // Reduce particle density on mobile for better performance
+        var densityDivisor = isTouchDevice ? 28000 : 14000;
+        function init() { particles = []; for (var i = 0; i < Math.floor((W*H)/densityDivisor); i++) particles.push(new Particle()); }
         init();
 
         function drawCanvas() {
@@ -401,14 +421,14 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         var sk = document.getElementById('page-loader');
         if (sk) sk.classList.add('hide');
-    }, 4000);
+    }, 5500);
 
     /* جلب البيانات ورسمها */
     fetchPortfolioData().then(function(db) {
         renderDynamicContent(db);
         /* إخفاء الـ loader بعد اكتمال البيانات — لا يقل عن 2.5 ثانية */
         var elapsed = Date.now() - _loadStart;
-        var delay = Math.max(0, 4000 - elapsed);
+        var delay = Math.max(0, 5500 - elapsed);
         setTimeout(function() {
             var sk = document.getElementById('page-loader');
             if (sk) sk.classList.add('hide');
