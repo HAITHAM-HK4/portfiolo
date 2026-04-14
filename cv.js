@@ -401,14 +401,14 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         var sk = document.getElementById('page-loader');
         if (sk) sk.classList.add('hide');
-    }, 5500);
+    }, 4000);
 
     /* جلب البيانات ورسمها */
     fetchPortfolioData().then(function(db) {
         renderDynamicContent(db);
         /* إخفاء الـ loader بعد اكتمال البيانات — لا يقل عن 2.5 ثانية */
         var elapsed = Date.now() - _loadStart;
-        var delay = Math.max(0, 5500 - elapsed);
+        var delay = Math.max(0, 4000 - elapsed);
         setTimeout(function() {
             var sk = document.getElementById('page-loader');
             if (sk) sk.classList.add('hide');
