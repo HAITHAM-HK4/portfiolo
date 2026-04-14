@@ -58,7 +58,34 @@
             </div>
         </nav>
         <a href="dashboard.html" target="_blank" class="dash-btn"><i class="fa-solid fa-gauge"></i></a>
+        <!-- Mobile hamburger — visible only on small screens -->
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">
+            <span></span><span></span><span></span>
+        </button>
     </header>
+
+    <!-- Mobile nav drawer -->
+    <div class="mobile-nav-overlay" id="mobileNav">
+        <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <nav class="mobile-nav-links">
+            <a href="#home"      onclick="closeMobileNav()" id="mnav-home">Home</a>
+            <a href="#about"     onclick="closeMobileNav()" id="mnav-about">About</a>
+            <a href="#skills"    onclick="closeMobileNav()" id="mnav-skills">Skills</a>
+            <a href="#portfolio" onclick="closeMobileNav()" id="mnav-projects">Projects</a>
+            <a href="#education" onclick="closeMobileNav()" id="mnav-edu">Education</a>
+            <a href="#contact"   onclick="closeMobileNav()" id="mnav-contact">Contact</a>
+        </nav>
+        <div class="mobile-nav-footer">
+            <div class="lang-switcher" onclick="toggleLang(); closeMobileNav()" style="cursor:pointer;">
+                <i class="fa-solid fa-globe"></i>&nbsp;<span id="lang-label-mobile">AR</span>
+            </div>
+            <a href="dashboard.html" target="_blank" class="mobile-dash-btn">
+                <i class="fa-solid fa-gauge"></i> Dashboard
+            </a>
+        </div>
+    </div>
 
     <section class="home" id="home">
         <div class="home-content reveal">
@@ -225,6 +252,84 @@
     </script>
 
     <script src="cv.js"></script>
+
+    <!-- ===== MOBILE NAV STYLES ===== -->
+    <style>
+    .hamburger-btn {
+        display: none;
+        flex-direction: column; justify-content: center; align-items: center;
+        gap: 5px; width: 2.8rem; height: 2.8rem;
+        background: rgba(0,210,255,0.08); border: 1px solid rgba(0,210,255,0.25);
+        border-radius: .6rem; cursor: pointer; transition: .3s;
+        padding: 0; margin-left: .3rem;
+    }
+    .hamburger-btn span {
+        display: block; width: 1.4rem; height: 2px;
+        background: #00d2ff; border-radius: 2px; transition: .3s;
+    }
+    .hamburger-btn:hover { background: rgba(0,210,255,0.2); box-shadow: 0 0 12px rgba(0,210,255,0.3); }
+    .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger-btn.open span:nth-child(2) { opacity: 0; }
+    .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mobile-nav-overlay {
+        display: none; position: fixed; inset: 0; z-index: 9999;
+        background: rgba(2,6,23,0.97); backdrop-filter: blur(20px);
+        flex-direction: column; align-items: center; justify-content: center;
+        opacity: 0; transition: opacity .3s ease;
+    }
+    .mobile-nav-overlay.open { display: flex; opacity: 1; }
+    .mobile-nav-close {
+        position: absolute; top: 1.5rem; right: 1.5rem;
+        width: 3.2rem; height: 3.2rem; border-radius: 50%;
+        background: rgba(0,210,255,0.08); border: 1px solid rgba(0,210,255,0.25);
+        color: #00d2ff; font-size: 1.4rem; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; transition: .3s;
+    }
+    .mobile-nav-close:hover { background: #ef4444; border-color: #ef4444; color: #fff; }
+    .mobile-nav-links {
+        display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+        width: 100%; padding: 0 2rem;
+    }
+    .mobile-nav-links a {
+        font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 700;
+        color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 3px;
+        padding: .8rem 2rem; border-radius: .6rem; transition: .3s; text-align: center;
+        width: 100%; max-width: 320px; cursor: pointer;
+    }
+    .mobile-nav-links a:hover {
+        color: #00d2ff; background: rgba(0,210,255,0.08);
+        text-shadow: 0 0 18px rgba(0,210,255,0.5);
+    }
+    .mobile-nav-footer {
+        display: flex; flex-direction: column; align-items: center; gap: 1.2rem;
+        margin-top: 2.5rem; padding-top: 2rem;
+        border-top: 1px solid rgba(0,210,255,0.12); width: 100%; max-width: 320px;
+    }
+    .mobile-dash-btn {
+        display: flex; align-items: center; gap: .6rem;
+        font-family: 'JetBrains Mono', monospace; font-size: 1.1rem;
+        color: #00fa9a; background: rgba(0,250,154,0.08);
+        border: 1px solid rgba(0,250,154,0.25); border-radius: .6rem;
+        padding: .7rem 1.8rem; transition: .3s; cursor: pointer;
+    }
+    .mobile-dash-btn:hover { background: rgba(0,250,154,0.18); box-shadow: 0 0 14px rgba(0,250,154,0.2); }
+    @media (max-width: 600px) { .hamburger-btn { display: flex; } }
+    </style>
+
+    <!-- ===== MOBILE NAV SCRIPT ===== -->
+    <script>
+    (function() {
+        var btn   = document.getElementById('hamburgerBtn');
+        var nav   = document.getElementById('mobileNav');
+        var close = document.getElementById('mobileNavClose');
+        function openMobileNav() { nav.classList.add('open'); btn.classList.add('open'); document.body.style.overflow='hidden'; }
+        window.closeMobileNav = function() { nav.classList.remove('open'); btn.classList.remove('open'); document.body.style.overflow=''; };
+        if (btn)   btn.addEventListener('click', openMobileNav);
+        if (close) close.addEventListener('click', closeMobileNav);
+        if (nav)   nav.addEventListener('click', function(e){ if(e.target===nav) closeMobileNav(); });
+    })();
+    </script>
 
 </body>
 </html>
