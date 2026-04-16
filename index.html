@@ -217,7 +217,8 @@
                     <input type="hidden" name="_captcha" value="false">
                     <input type="text" name="name" placeholder="Your Name" class="contact-single-input" required>
                     <input type="email" name="email" placeholder="Your Email" class="contact-single-input" required>
-                    <input type="text" name="_subject" placeholder="Your Subject" class="contact-single-input" required>
+                    <input type="hidden" name="_subject" id="hidden-subject" value="New message from portfolio">
+                    <input type="text" name="subject" id="subject-field" placeholder="Subject" class="contact-single-input" required>
                     <textarea name="message" cols="30" rows="5" placeholder="Your Message" required></textarea>
                     <button type="submit" class="btn btn-primary" style="width:100%;">Send Message &#x279C;</button>
                 </form>
@@ -253,6 +254,18 @@
     </script>
 
     <script src="cv.js"></script>
+    <script>
+    // Sync visible subject → hidden _subject so Formspree uses it as email title
+    (function() {
+        var subjectField  = document.getElementById('subject-field');
+        var hiddenSubject = document.getElementById('hidden-subject');
+        if (subjectField && hiddenSubject) {
+            subjectField.addEventListener('input', function() {
+                hiddenSubject.value = subjectField.value || 'New message from portfolio';
+            });
+        }
+    })();
+    </script>
 
     <!-- ===== MOBILE NAV STYLES ===== -->
     <style>
